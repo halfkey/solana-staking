@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-crypto-dark text-crypto-text font-sans;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-crypto-dark focus:ring-opacity-50;
+  }
+  .btn-primary {
+    @apply bg-crypto-accent text-crypto-dark hover:bg-opacity-80 focus:ring-crypto-accent;
+  }
+  .btn-secondary {
+    @apply bg-crypto-medium text-crypto-text hover:bg-opacity-80 focus:ring-crypto-medium;
+  }
+}
+
+/* Custom styles for wallet adapter UI */
+.wallet-adapter-button.custom-wallet-button {
+  background-color: theme('colors.crypto-accent') !important;
+  color: theme('colors.crypto-dark') !important;
+  font-family: theme('fontFamily.sans') !important;
+  font-size: 16px !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  transition: background-color 0.2s !important;
+}
+
+.wallet-adapter-button.custom-wallet-button:hover {
+  background-color: theme('colors.crypto-accent') !important;
+  opacity: 0.8 !important;
+}
+
+.wallet-adapter-button.custom-wallet-button:not([disabled]):hover {
+  background-color: theme('colors.crypto-accent') !important;
+  opacity: 0.8 !important;
+}
+
+.wallet-adapter-button-start-icon {
+  margin-right: 0.5rem !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: theme('colors.crypto-medium') !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: theme('colors.crypto-light') !important;
+  color: theme('colors.crypto-text') !important;
+}
+
+.wallet-adapter-modal-title {
+  color: theme('colors.crypto-text') !important;
+}
+
+.wallet-adapter-modal-content {
+  color: theme('colors.crypto-text') !important;
+}
+
+.wallet-adapter-modal-list-more {
+  color: theme('colors.crypto-accent') !important;
+}
+
+.wallet-adapter-modal-list li {
+  background-color: theme('colors.crypto-light') !important;
+  color: theme('colors.crypto-text') !important;
+}
+
+.wallet-adapter-modal-list li:not(:first-of-type) {
+  margin-top: 0.5rem !important;
+}
+
+.wallet-adapter-modal-list li button {
+  color: theme('colors.crypto-text') !important;
+}
