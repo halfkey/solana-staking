@@ -15,10 +15,9 @@ function ValidatorList({ setValidators, onSelectValidator }) {
   const fetchValidators = useCallback(async () => {
     try {
       await solanaBeachRateLimiter.waitForToken();
-      const response = await axios.get(`${SOLANA_BEACH_API_URL}/validators/all`, {
+      const response = await axios.get(`${SOLANA_BEACH_API_URL}?path=/validators/all`, {
         headers: {
-          'Accept': 'application/json',
-          'Authorization': process.env.REACT_APP_SOLANA_BEACH_API_KEY
+          'Accept': 'application/json'
         }
       });
 
