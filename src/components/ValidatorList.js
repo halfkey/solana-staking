@@ -22,15 +22,21 @@ function ValidatorList({ setValidators, onSelectValidator }) {
         }
       });
 
+      console.log('API Response:', response);
+
       if (response.data && Array.isArray(response.data)) {
-        console.log('First validator data:', response.data[0]);
         setValidatorsState(response.data);
-        setValidators(response.data); // Update the validators in App.js
+        setValidators(response.data);
       } else {
+        console.error('Invalid API response structure:', response.data);
         throw new Error('Invalid response from Solana Beach API');
       }
     } catch (err) {
       console.error('Error fetching validators:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+        console.error('Status code:', err.response.status);
+      }
       setError(`Failed to fetch validators: ${err.message}`);
     } finally {
       setLoading(false);

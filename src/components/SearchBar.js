@@ -20,14 +20,20 @@ function SearchBar({ validators, onSelectValidator }) {
   }, []);
 
   useEffect(() => {
-    if (searchTerm.length > 0 && validators.length > 0) {
-      const filtered = validators.filter(validator =>
-        (validator.moniker && validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        validator.votePubkey.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredValidators(filtered);
-      setShowDropdown(true);
-    } else {
+    try {
+      if (searchTerm.length > 0 && validators.length > 0) {
+        const filtered = validators.filter(validator =>
+          (validator.moniker && validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          validator.votePubkey.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredValidators(filtered);
+        setShowDropdown(true);
+      } else {
+        setFilteredValidators([]);
+        setShowDropdown(false);
+      }
+    } catch (error) {
+      console.error('Error filtering validators:', error);
       setFilteredValidators([]);
       setShowDropdown(false);
     }

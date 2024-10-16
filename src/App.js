@@ -14,7 +14,12 @@ function App() {
   const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
 
   const handleSelectValidator = (validator) => {
-    setSelectedValidator(validator);
+    try {
+      setSelectedValidator(validator);
+    } catch (error) {
+      console.error('Error selecting validator:', error);
+      // You could set an error state here and display it to the user
+    }
   };
 
   return (
