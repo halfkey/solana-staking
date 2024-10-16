@@ -97,7 +97,7 @@ function ValidatorDetails({ validator, onBack }) {
 function ValidatorInfo({ validator }) {
   return (
     <div className="mb-6 text-crypto-text space-y-2">
-      <p><span className="font-medium text-crypto-muted">Node Pubkey:</span> {validator.nodePubkey}</p>
+      <p><span className="font-medium text-crypto-muted">Name:</span> {validator.moniker || 'N/A'}</p>
       <p><span className="font-medium text-crypto-muted">Vote Pubkey:</span> {validator.votePubkey}</p>
       <p><span className="font-medium text-crypto-muted">Commission:</span> {validator.commission}%</p>
       <p><span className="font-medium text-crypto-muted">Active Stake:</span> {(validator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)} SOL</p>

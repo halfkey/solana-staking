@@ -1,42 +1,48 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useConnection } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import ValidatorDetails from './ValidatorDetails';
-import { VALIDATORS_PER_PAGE, TOTAL_VALIDATORS } from '../config';
+import { VALIDATORS_PER_PAGE, TOTAL_VALIDATORS, SOLANA_BEACH_API_URL } from '../config';
+import { solanaBeachRateLimiter } from '../utils/rateLimiter';
+import axios from 'axios';
 
-function ValidatorList() {
-  const [validators, setValidators] = useState([]);
+function ValidatorList({ setValidators, onSelectValidator }) {
+  const [validatorsState, setValidatorsState] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedValidator, setSelectedValidator] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const { connection } = useConnection();
   const [sortBy, setSortBy] = useState('stake'); // 'stake', 'commission'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
 
   const fetchValidators = useCallback(async () => {
     try {
-      const voteAccounts = await connection.getVoteAccounts();
-      if (!voteAccounts || (!voteAccounts.current && !voteAccounts.delinquent)) {
-        throw new Error('Invalid response from getVoteAccounts');
+      await solanaBeachRateLimiter.waitForToken();
+      const response = await axios.get(`${SOLANA_BEACH_API_URL}/validators/all`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': process.env.REACT_APP_SOLANA_BEACH_API_KEY
+        }
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        console.log('First validator data:', response.data[0]);
+        setValidatorsState(response.data);
+        setValidators(response.data); // Update the validators in App.js
+      } else {
+        throw new Error('Invalid response from Solana Beach API');
       }
-      
-      const allValidators = [...(voteAccounts.current || []), ...(voteAccounts.delinquent || [])];
-      setValidators(allValidators);
     } catch (err) {
       console.error('Error fetching validators:', err);
       setError(`Failed to fetch validators: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  }, [connection]);
+  }, [setValidators]);
 
   useEffect(() => {
     fetchValidators();
   }, [fetchValidators]);
 
   const sortedValidators = useMemo(() => {
-    return [...validators].sort((a, b) => {
+    return [...validatorsState].sort((a, b) => {
       if (sortBy === 'stake') {
         return sortOrder === 'desc' ? b.activatedStake - a.activatedStake : a.activatedStake - b.activatedStake;
       } else if (sortBy === 'commission') {
@@ -44,7 +50,7 @@ function ValidatorList() {
       }
       return 0;
     }).slice(0, TOTAL_VALIDATORS);
-  }, [validators, sortBy, sortOrder]);
+  }, [validatorsState, sortBy, sortOrder]);
 
   const currentValidators = useMemo(() => {
     const startIndex = (currentPage - 1) * VALIDATORS_PER_PAGE;
@@ -66,7 +72,6 @@ function ValidatorList() {
 
   if (loading) return <div className="text-center text-crypto-text">Loading validators...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
-  if (selectedValidator) return <ValidatorDetails validator={selectedValidator} onBack={() => setSelectedValidator(null)} />;
 
   return (
     <div className="bg-crypto-medium p-6 rounded-lg shadow-lg">
@@ -98,10 +103,23 @@ function ValidatorList() {
               <tr 
                 key={validator.votePubkey}
                 className="cursor-pointer hover:bg-crypto-light transition-colors duration-150"
-                onClick={() => setSelectedValidator(validator)}
+                onClick={() => onSelectValidator(validator)}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-crypto-text">{(currentPage - 1) * VALIDATORS_PER_PAGE + index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-crypto-text">{formatPubkey(validator.votePubkey)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-crypto-text">
+                  <div className="flex items-center">
+                    <img 
+                      src={validator.pictureUrl || 'https://via.placeholder.com/40'}
+                      alt={validator.moniker || 'Validator'}
+                      className="w-10 h-10 rounded-full mr-3"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/40';
+                      }}
+                    />
+                    <span>{validator.moniker || formatPubkey(validator.votePubkey)}</span>
+                  </div>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-crypto-text">{(validator.activatedStake / LAMPORTS_PER_SOL).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-crypto-text">{validator.commission}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-crypto-text">{validator.lastVote}</td>
